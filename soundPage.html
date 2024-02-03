@@ -1,0 +1,55 @@
+<html>
+    <head>
+        <script src="https://cdn.jsdelivr.net/gh/scottschiller/SoundManager2/script/soundmanager2-jsmin.js"></script>
+    </head>
+
+    <body>
+
+        <script>
+            const broadcastChannel = new BroadcastChannel("SAMMI_remote_sound_player");
+
+            initializeOnContentLoad();
+
+            function initializeOnContentLoad(){
+                
+                addEvent(broadcastChannel, "message", (event)=>{
+                    if(event.data.command == "play_sound"){
+                        handlePlayCommand(event.data);
+                    }
+                    else if(event.data.command == "ping"){
+                        sendPong();
+                    }
+                });
+            }
+
+            function addEvent(elem = false, evType, fn, params) {
+                if (elem.addEventListener) {
+                    elem.addEventListener(evType, fn, params);
+                }
+                else if (elem.attachEvent) {
+                    elem.attachEvent('on' + evType, fn);
+                }
+                else {
+                    elem['on' + evType] = fn;
+                }
+            }
+
+            function sendPong(){
+                broadcastChannel.postMessage({command: "pong"});
+            }
+
+            function handlePlayCommand(eventData){
+                let dataURL = eventData.dataURL;
+                let volume = eventData.volume;
+
+                sound = soundManager.createSound({
+                    url: dataURL,
+                    autoLoad: true,
+                    volume: volume,
+                    whileloading: function() { console.log(this.id + ' is loading'); }
+                });
+                sound.play();
+            }
+        </script>
+    </body>
+</html>
